@@ -11,7 +11,7 @@ class PriceScreen extends StatefulWidget {
 
 class _PriceScreenState extends State<PriceScreen> {
   String selectedCurrency = 'USD';
-  int value;
+  int selectedCurrencyPrice;
 
   Widget iOSPicker() {
     List<Widget> currenciesItems = [];
@@ -23,7 +23,8 @@ class _PriceScreenState extends State<PriceScreen> {
     return CupertinoPicker(
       itemExtent: 32,
       onSelectedItemChanged: (int selectedIndex) {
-        print(selectedIndex);
+        selectedCurrency = currenciesList[selectedIndex];
+        getCoinValue(selectedCurrency);
       },
       children: currenciesItems,
     );
@@ -46,22 +47,23 @@ class _PriceScreenState extends State<PriceScreen> {
         setState(
           () {
             selectedCurrency = value;
+            getCoinValue(selectedCurrency);
           },
         );
       },
     );
   }
 
-  Future<void> getCoinValue() async {
+  Future<void> getCoinValue(String currency) async {
     CoinData coinData = CoinData();
-    value = await coinData.getCoinData();
+    selectedCurrencyPrice = await coinData.getCoinData(currency);
     setState(() {});
   }
 
   @override
   void initState() {
     super.initState();
-    getCoinValue();
+    getCoinValue('USD');
   }
 
   @override
@@ -85,7 +87,9 @@ class _PriceScreenState extends State<PriceScreen> {
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
                 child: Text(
-                  value != null ? '1 BTC = $value USD' : '1 BTC = ? USD',
+                  selectedCurrencyPrice != null
+                      ? '1 BTC = $selectedCurrencyPrice $selectedCurrency'
+                      : '1 BTC = ? $selectedCurrency',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 20.0,
@@ -100,7 +104,7 @@ class _PriceScreenState extends State<PriceScreen> {
             alignment: Alignment.center,
             padding: EdgeInsets.only(bottom: 30.0),
             color: Colors.lightBlue,
-            child: Platform.isIOS ? iOSPicker() : androidPicker(),
+            child: Platform.isAndroid ? iOSPicker() : androidPicker(),
           ),
         ],
       ),
