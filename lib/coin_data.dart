@@ -35,15 +35,20 @@ const List<String> cryptoList = [
 ];
 
 class CoinData {
-  Future<int> getCoinData(String currency) async {
-    http.Response response = await http
-        .get('https://rest.coinapi.io/v1/exchangerate/BTC/$currency?apikey=$keyAPI');
-    if (response.statusCode == 200) {
-      Map decodedJson = jsonDecode(response.body);
-      double rawValue = decodedJson['rate'];
-      int value = rawValue.toInt();
-      print(value);
-      return value;
+  Future<Map> getCoinData(String currency) async {
+    Map virtualCurrencies = {};
+    for (String virtualCurrency in cryptoList) {
+      http.Response response = await http.get(
+          'https://rest.coinapi.io/v1/exchangerate/$virtualCurrency/$currency?apikey=$keyAPI');
+      if (response.statusCode == 200) {
+        Map decodedJson = jsonDecode(response.body);
+        double rawValue = decodedJson['rate'];
+        int value = rawValue.toInt();
+        virtualCurrencies[virtualCurrency] = value;
+      } else {
+        virtualCurrencies = {'BTC': 1, 'ETH': 2, 'LTC': 3};
+      }
     }
+    return virtualCurrencies;
   }
 }
